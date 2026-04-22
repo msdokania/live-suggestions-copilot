@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { groqTranscribe } from "@/lib/groq";
 
-// Audio uploads are binary; tell Next to not try to parse the body.
+// Audio uploads are binary
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await groqTranscribe(apiKey, audio, { promptBias, model });
-    // console.log(`Result from transcribe: ${JSON.stringify(result, null, 2)}`);
     return NextResponse.json({ text: result.text ?? "" });
   } catch (err: any) {
     console.log(`Error from transcribe: ${JSON.stringify(err, null, 2)}`);

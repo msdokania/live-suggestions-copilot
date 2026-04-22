@@ -11,11 +11,14 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "katex": "^0.16.45",
     "next": "^16.2.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

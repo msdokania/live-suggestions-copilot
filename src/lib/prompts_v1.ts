@@ -1,34 +1,3 @@
-// =============================================================================
-// Default prompts and settings.
-//
-// Everything here is editable by the user in the Settings screen at runtime.
-// These defaults represent the best version we've found through iteration.
-//
-// Design principles, in priority order:
-//
-//  1. SPECIFICITY OVER ABSTRACTION. Every suggestion must carry at least one
-//     concrete element: a number, a named entity, a specific claim, a dated
-//     event. "Discuss scalability trade-offs" is useless. "Discord shards by
-//     guild ID, ~150k concurrent users per shard" is a suggestion.
-//
-//  2. RECENCY WEIGHT. The last ~30 seconds of transcript matter 5x more than
-//     the minute before. We surface the most-recent chunk under its own header
-//     and instruct the model to anchor every suggestion to it.
-//
-//  3. TYPE DIVERSITY. A batch of 3 must mix at least 2 different types,
-//     unless the conversation strongly calls for otherwise (e.g. a direct
-//     question was just asked → one `answer` is mandatory).
-//
-//  4. STANDALONE VALUE. `preview` must deliver value without clicking. No
-//     teasers. No "want to know more about X?" phrasings.
-//
-//  5. ANTI-REPETITION. We pass titles of the last 2 batches and forbid
-//     repetition; stale ideas are the fastest way to lose user trust.
-//
-//  6. PROMPT-CACHE FRIENDLY. All static instruction text lives at the top.
-//     Dynamic transcript goes last. Groq caches shared prefixes at 50% off.
-// =============================================================================
-
 export const DEFAULT_SUGGESTION_SYSTEM_PROMPT = `You are the live-suggestions engine for TwinMind, an always-on meeting copilot. A user is in a live conversation right now. Every ~30 seconds you get the most recent transcript and must output exactly 3 useful suggestions they can glance at without breaking flow.
 
 # SUGGESTION TYPES

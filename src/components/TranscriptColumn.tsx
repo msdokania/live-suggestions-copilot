@@ -19,9 +19,8 @@ export function TranscriptColumn() {
   const { settings } = useSettings();
 
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const lastTranscriptTailRef = useRef<string>(""); // for Whisper promptBias - taking some part of last transcript
+  const lastTranscriptTailRef = useRef<string>(""); // for Whisper promptBias
 
-  // Diagnostic counters — visible in the UI so silent failures are never silent.
   const [chunksReceived, setChunksReceived] = useState(0);
   const [inFlight, setInFlight] = useState(0);
 
@@ -52,18 +51,17 @@ export function TranscriptColumn() {
       setInFlight((n) => n + 1);
       try {
         const form = new FormData();
-        // form.append("audio", blob, "chunk.webm");
         form.append("audio", blob, blob.type.includes("mp4") ? "chunk.m4a" : "chunk.webm");
         if (lastTranscriptTailRef.current) {
-          // form.append("promptBias", lastTranscriptTailRef.current);
-          form.append("promptBias", lastTranscriptTailRef.current.slice(-150));
-          console.log(
-          `promptBias=${lastTranscriptTailRef.current}`,
-        );
+          form.append("promptBias", lastTranscriptTailRef.current);
+          // form.append("promptBias", lastTranscriptTailRef.current.slice(-150));
+          // console.log(
+          //   `promptBias=${lastTranscriptTailRef.current}`,
+          // );
         }
         form.append("model", settings.transcriptionModel);
 
-        // Dev-visible breadcrumb so you can see every chunk flowing.
+        // for debugging on dev - not prod
         console.log(
           `[transcribe] chunk #${index} size=${(blob.size / 1024).toFixed(1)}KB type=${blob.type}`,
         );
@@ -76,16 +74,8 @@ export function TranscriptColumn() {
         const data = await resp.json();
         if (!resp.ok) {
           const errMsg = String(data.error ?? `HTTP ${resp.status}`);
-          // Silently drop "audio too short" — benign, happens on mic stabilization
-          // or stop-flush. Surface everything else so real errors are visible.
-          // if (/too short|minimum audio length/i.test(errMsg)) {
-          //   console.log(`[transcribe] chunk #${index} too short, dropped`);
-          //   return;
-          // }7
           appendTranscript(`[⚠️ ${errMsg}]`);
           return;
-          // appendTranscript(`[⚠️ ${data.error ?? `HTTP ${resp.status}`}]`);
-          // return;
         }
         const text = (data.text ?? "").trim();
         if (text && text === prevChunkTextRef.current) {
@@ -95,12 +85,8 @@ export function TranscriptColumn() {
         if (text) {
           prevChunkTextRef.current = text;
           appendTranscript(text);
-          // Keep the tail for the next chunk's Whisper prompt — helps with
-          // proper-noun continuity and mid-word splits across boundaries.
           lastTranscriptTailRef.current = text.slice(-400);
         } else {
-          // Empty transcription — usually silence. Don't pollute the transcript,
-          // but log it so the debug counter explains the gap.
           console.log(`[transcribe] chunk #${index} returned empty text`);
         }
       } catch (err: any) {
@@ -128,7 +114,6 @@ export function TranscriptColumn() {
         setChunksReceived(0);
         setInFlight(0);
         await start();
-        // await new Promise(r => setTimeout(r, 300)); // let mic stabilize
         setRecording(true);
       } catch (err: any) {
         alert(`Microphone permission denied: ${err?.message ?? err}`);

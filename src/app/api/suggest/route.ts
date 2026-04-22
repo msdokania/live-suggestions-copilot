@@ -47,12 +47,11 @@ export async function POST(req: NextRequest) {
       temperature: body.temperature,
       reasoning_effort: body.reasoningEffort,
       response_format: { type: "json_object" },
-      max_tokens: 1200,
+      max_tokens: 1500,
     });
 
     const raw = completion?.choices?.[0]?.message?.content ?? "";
     const suggestions = parseSuggestions(raw);
-    console.log(`Suggestions: ${JSON.stringify(suggestions, null, 2)}`);
 
     if (!suggestions || suggestions.length === 0) {
       return NextResponse.json(
@@ -60,15 +59,6 @@ export async function POST(req: NextRequest) {
         { status: 502 },
       );
     }
-
-    // const filtered = (() => {
-    //   if (suggestions.length <= 3) return suggestions;
-    //   const high = suggestions.filter(s => s.confidence === "high");
-    //   const medium = suggestions.filter(s => s.confidence === "medium");
-    //   const combined = [...high, ...medium];
-    //   if (combined.length >= 2) return combined.slice(0, 3);
-    //   return suggestions;
-    // })();
     return NextResponse.json({
       suggestions: suggestions,
       generationMs: Date.now() - started,

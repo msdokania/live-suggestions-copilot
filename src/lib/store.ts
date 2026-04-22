@@ -122,6 +122,9 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: "twinmind-settings-v1",
+      onRehydrateStorage: () => (s) => {
+        if (s) {s.settings.meetingContext = "";}
+      },
     },
   ),
 );

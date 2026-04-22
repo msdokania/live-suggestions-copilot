@@ -33,7 +33,7 @@ export function useSuggestionOrchestrator() {
   const firstBatchFiredRef = useRef<boolean>(false);
   const lastProcessedTranscriptLenRef = useRef(0);
   const lastBatchGeneratedAtRef = useRef<number>(0);
-  // const lastBatchTranscriptLenRef = useRef<number>(0);    // to skip auto-refresh calls when nothing new has been said.
+  const lastBatchTranscriptLenRef = useRef<number>(0);    // to skip auto-refresh calls when nothing new has been said.
 
   const resetCountdown = useCallback(() => {
     countdownStartRef.current = Date.now();
@@ -73,7 +73,7 @@ export function useSuggestionOrchestrator() {
 
       const recentBatchTitles = batches
         .slice(0, settings.recentBatchesForDedup)
-        .flatMap((b) => b.suggestions.map((s) => s.preview.split(" ").slice(0, 6).join(" ")));
+        .flatMap((b) => b.suggestions.map((s) => s.title));
 
       setGeneratingSuggestions(true);
       setLastSuggestionError(null);
@@ -103,34 +103,35 @@ export function useSuggestionOrchestrator() {
           const retryMs = Number(data.retryAfterMs ?? 15000);
           const retrySec = Math.ceil(retryMs / 1000);
           // rateLimitUntilRef.current = Date.now() + retryMs;
-          setLastSuggestionError(`Rate limit reached. Retrying in ${retrySec}s…`);
+          setLastSuggestionError(`Rate limit reached (Groq free tier: 8k TPM). Retry in ${retrySec}s — or upgrade to dev tier for higher limits.`);
           // setTimeout(() => {
           //   setLastSuggestionError(null);
           //   runOnceRef.current(false);
           // }, retryMs + 500);
           return;
         }
-        // if (resp.status === 400 && data.error?.includes("invalid JSON")) {
-        //   console.warn("[orchestrator] Model emitted invalid JSON, retrying once");
-        //   const retryResp = await fetch("/api/suggest", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json", "x-groq-key": settings.groqApiKey },
-        //     body: JSON.stringify({ 
-        //       systemPrompt: settings.suggestionSystemPrompt,
-        //       model: settings.suggestionModel,
-        //       meetingContext: settings.meetingContext,
-        //       reasoningEffort: settings.suggestionReasoningEffort,
-        //       temperature: settings.suggestionTemperature,
-        //       transcriptWindow: earlier,
-        //       mostRecent,
-        //       recentBatchTitles,
-        //      }),
-        //   });
-        //   if (retryResp.ok) {
-        //     resp = retryResp;
-        //     data = await retryResp.json();
-        //   }
-        // }
+        if (resp.status === 400 && data.error?.includes("invalid JSON")) {
+          console.warn("[orchestrator] Model emitted invalid JSON, retrying once");
+          await new Promise(r => setTimeout(r, 300));
+          const retryResp = await fetch("/api/suggest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-groq-key": settings.groqApiKey },
+            body: JSON.stringify({ 
+              systemPrompt: settings.suggestionSystemPrompt,
+              model: settings.suggestionModel,
+              meetingContext: settings.meetingContext,
+              reasoningEffort: settings.suggestionReasoningEffort,
+              temperature: settings.suggestionTemperature,
+              transcriptWindow: earlier,
+              mostRecent,
+              recentBatchTitles,
+             }),
+          });
+          if (retryResp.ok) {
+            resp = retryResp;
+            data = await retryResp.json();
+          }
+        }
         if (!resp.ok) {
           // setLastSuggestionError(data.error ?? "Failed to generate suggestions");
           throw new Error(data.error ?? `HTTP ${resp.status}`);
@@ -145,7 +146,7 @@ export function useSuggestionOrchestrator() {
         };
         addBatch(batch);
         lastBatchGeneratedAtRef.current = Date.now();
-        // lastBatchTranscriptLenRef.current = transcript.length;
+        lastBatchTranscriptLenRef.current = transcript.length;
       } catch (err: any) {
         // setLastSuggestionError("Network error. Please check connection and try again.");
         setLastSuggestionError(err?.message ?? "Failed to generate suggestions");
@@ -183,7 +184,7 @@ export function useSuggestionOrchestrator() {
     if (isRecording) {
       firstBatchFiredRef.current = false;
       lastProcessedTranscriptLenRef.current = 0
-      // lastBatchTranscriptLenRef.current = 0;
+      lastBatchTranscriptLenRef.current = 0;
     }
   }, [isRecording]);
 
@@ -213,13 +214,19 @@ export function useSuggestionOrchestrator() {
       transcript.map((c) => c.text).join("").trim().length >= 10
     ) {
       lastProcessedTranscriptLenRef.current = transcript.length;
-      const msSinceLastBatch = Date.now() - lastBatchGeneratedAtRef.current;
-      if (msSinceLastBatch < 10_000) {
-        console.log(
-          `[orchestrator] skipping stop-triggered call; last batch was ${msSinceLastBatch}ms ago`,
-        );
-        return;
-      }
+      if (transcript.length <= lastBatchTranscriptLenRef.current) {
+          console.log(
+            `[orchestrator] skipping catch-up; last batch already covered transcript len ${transcript.length}`,
+          );
+          return;
+        }
+      // const msSinceLastBatch = Date.now() - lastBatchGeneratedAtRef.current;
+      // if (msSinceLastBatch < 10_000) {
+      //   console.log(
+      //     `[orchestrator] skipping stop-triggered call; last batch was ${msSinceLastBatch}ms ago`,
+      //   );
+      //   return;
+      // }
       runOnceRef.current(false);
     }
   }, [isRecording, transcript]);

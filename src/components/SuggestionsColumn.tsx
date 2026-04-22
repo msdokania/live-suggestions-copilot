@@ -128,11 +128,17 @@ export function SuggestionsColumn({
         }
 
         {batches.length === 0 && !isGeneratingSuggestions && (
-          <div className="text-neutral-500 text-sm">
-            Suggestions will appear here as the conversation unfolds. Each batch
-            contains 3 fresh, context-anchored ideas — questions to ask,
-            talking points, answers to questions just asked, or fact-checks.
-            The newest batch appears on top.
+          <div className="space-y-3">
+            <div className="text-neutral-500 text-sm leading-relaxed">
+              Suggestions will appear here as the conversation unfolds. Each batch
+              contains 3 fresh, context-anchored ideas - questions to ask,
+              talking points, answers to questions just asked, or fact-checks.
+              The newest batch appears on top.
+            </div>
+            <div className="border border-blue-500/20 bg-blue-500/10 rounded-md px-3 py-2 text-sm text-blue-300">
+              <span className="font-semibold">Tip:</span>{" "}
+              Add 'Meeting Context' in Settings for better suggestions.
+            </div>
           </div>
         )}
 
@@ -191,7 +197,7 @@ function SuggestionCard({
     <button
       type="button"
       onClick={onClick}
-      // title={suggestion.sourceHint || undefined}
+      // title={suggestion.title || undefined}
       className={clsx(
         // "w-full text-left rounded-lg border border-panel-border bg-panel-soft px-4 py-3",
         // "hover:border-neutral-500 hover:bg-[#1a1e27] transition-colors",

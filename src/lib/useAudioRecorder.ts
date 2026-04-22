@@ -2,19 +2,6 @@
 
 import { useCallback, useEffect, useRef } from "react";
 
-/**
- * Records the mic and emits a complete, self-contained WebM/Opus blob every
- * `chunkMs` milliseconds.
- *
- * Implementation note: we DO NOT use MediaRecorder's `timeslice` parameter.
- * Timeslice produces fragmented WebM chunks that aren't independently
- * decodable — Whisper rejects them. Instead we call .stop() → .start() on a
- * timer, which produces a series of complete, standalone WebM files.
- *
- * Known limitation: the stop/start cycle has a tiny gap (~tens of ms) where
- * mic input is dropped. Acceptable for the assignment; a production build
- * would dual-buffer.
- */
 export function useAudioRecorder(opts: {
   chunkMs: number;
   onChunk: (blob: Blob, index: number) => void | Promise<void>;
@@ -90,24 +77,13 @@ export function useAudioRecorder(opts: {
 
     startRecorder();
 
-    // Emit the first chunk early so the user sees transcript and suggestions
-    // fire within ~6 seconds instead of waiting the full 30s. After the first
-    // chunk, we settle into the normal cadence.
-    const FIRST_CHUNK_MS = Math.min(7000, opts.chunkMs);
+    const FIRST_CHUNK_MS = Math.min(6000, opts.chunkMs);
 
     const scheduleTick = (delayMs: number) => {
       tickRef.current = setTimeout(() => {
         const rec = recorderRef.current;
         if (rec && rec.state === "recording") {
           console.log(`[recorder] tick: stopping recorder to flush chunk`);
-          // Ask the recorder to flush any buffered data into ondataavailable,
-          // then stop. Not strictly required — stop() triggers ondataavailable
-          // automatically — but defensive against some browser quirks.
-          // try {
-          //   rec.requestData();
-          // } catch {
-          //   /* not all browsers support this; fine to ignore */
-          // }
           rec.stop();
         } else {
           console.log(
@@ -129,7 +105,6 @@ export function useAudioRecorder(opts: {
     }
     const rec = recorderRef.current;
     if (rec && rec.state === "recording") {
-      // Fire a final chunk — onstop will NOT restart because activeRef is false.
       rec.stop();
     }
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -156,38 +131,3 @@ function pickMime(): string | undefined {
   }
   return undefined;
 }
-
-// // src/lib/audioAnalysis.ts
-
-// /**
-//  * Measures the RMS (loudness) of an audio blob to detect silent chunks.
-//  * Returns a value in [0, 1] where 0 is dead silence.
-//  *
-//  * We use this to avoid shipping silent chunks to Whisper — Whisper
-//  * hallucinates on silence by echoing the `prompt` parameter repeatedly.
-//  */
-// export async function measureAudioRMS(blob: Blob): Promise<number> {
-//   try {
-//     const arrayBuffer = await blob.arrayBuffer();
-//     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-//     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-//     // Get the first channel; mono mic input is what we care about.
-//     const channel = audioBuffer.getChannelData(0);
-
-//     // Compute RMS over the whole buffer.
-//     let sumSquares = 0;
-//     for (let i = 0; i < channel.length; i++) {
-//       sumSquares += channel[i] * channel[i];
-//     }
-//     const rms = Math.sqrt(sumSquares / channel.length);
-
-//     // Close the context to avoid leaks.
-//     audioCtx.close();
-
-//     return rms;
-//   } catch (err) {
-//     console.warn("[audioAnalysis] RMS measurement failed, defaulting to 'loud enough'", err);
-//     return 1; // On measurement failure, assume the chunk is valid — don't drop user audio.
-//   }
-// }

@@ -38,6 +38,7 @@ export function useChatStream() {
         createdAt: Date.now(),
         role: "user",
         content: userText,
+        sourceSuggestionId: sourceSuggestion? "model" : "user",
       };
       addChatMessage(userMsg);
 

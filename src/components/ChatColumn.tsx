@@ -8,6 +8,8 @@ import { useChatStream } from "@/lib/useChatStream";
 import type { Suggestion } from "@/lib/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 export interface ChatColumnHandle {
   sendSuggestion: (s: Suggestion) => void;
@@ -73,35 +75,30 @@ export const ChatColumn = forwardRef<ChatColumnHandle>(function ChatColumn(
                   m.role === "user" ? "text-neutral-400" : "text-neutral-500"
                 }`}
               >
-                {m.role === "user" ? "You" : "Assistant"}
-              </div>
-              {/* <div className="prose-chat text-[14px] text-neutral-100 whitespace-pre-wrap"> */}
-              {/* <div className={clsx(
-                "prose-chat text-[14px] text-neutral-100 whitespace-pre-wrap",
-                m.role === "assistant"
-                  ? "bg-panel-soft/60 border border-panel-border rounded-md px-4 py-3"
-                  : "px-1",
-              )}>
-                {m.content ? (
-                    m.content
-                  ) : m.role === "assistant" ? (
-                    <ThinkingIndicator />
-                  ) : null}
-                {m.content || (
-                  <span className="text-neutral-500 italic">…</span>
+                {m.role === "assistant" ? ("ASSISTANT") : (
+                  <>
+                    YOU
+                    {m.sourceSuggestionId === "model" && (
+                      <>
+                        <span className="text-neutral-600"> · </span>
+                        <span className="text-neutral-500">ANSWER</span>
+                      </>
+                    )}
+                  </>
                 )}
-              </div> */}
+              </div>
+
               <div
                 className={clsx(
-                  "prose prose-invert max-w-none text-[14px]",
+                  "prose prose-invert max-w-none text-[14px] break-words overflow-wrap-anywhere",
                   m.role === "assistant"
                     ? "bg-panel-soft/60 border border-panel-border rounded-md px-4 py-3"
                     : "px-1"
                 )}
               >
                 {m.content ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {m.content}
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    {normalizeLatexInput(m.content)}
                   </ReactMarkdown>
                 ) : m.role === "assistant" ? (
                   <ThinkingIndicator message="Thinking" />
@@ -130,6 +127,11 @@ export const ChatColumn = forwardRef<ChatColumnHandle>(function ChatColumn(
           Send
         </button>
       </div>
+      <div className="px-5">
+        <div className="text-[11px] text-neutral-500 italic mt-1 mb-3 text-center">
+          Based on model training knowledge - verify before citing in a meeting.
+        </div>
+      </div>
     </Panel>
   );
 });
@@ -145,4 +147,13 @@ export function ThinkingIndicator({ message = "Thinking" }: { message?: string }
       </span>
     </span>
   );
+}
+
+function normalizeLatexInput(text: string) {
+  return text
+    .replace(/\u202F/g, " ")  // narrow no-break space → normal space
+    .replace(/\u00A0/g, " ")  // non-breaking space → normal space
+    .replace(/\u2011/g, "-")  // non-breaking hyphen → hyphen
+    .replace(/\u2013/g, "-")  // en dash → hyphen
+    .replace(/\u2014/g, "-"); // em dash → hyphen
 }
