@@ -61,16 +61,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const filtered = (() => {
-      if (suggestions.length <= 3) return suggestions;
-      const high = suggestions.filter(s => s.confidence === "high");
-      const medium = suggestions.filter(s => s.confidence === "medium");
-      const combined = [...high, ...medium];
-      if (combined.length >= 2) return combined.slice(0, 3);
-      return suggestions;
-    })();
+    // const filtered = (() => {
+    //   if (suggestions.length <= 3) return suggestions;
+    //   const high = suggestions.filter(s => s.confidence === "high");
+    //   const medium = suggestions.filter(s => s.confidence === "medium");
+    //   const combined = [...high, ...medium];
+    //   if (combined.length >= 2) return combined.slice(0, 3);
+    //   return suggestions;
+    // })();
     return NextResponse.json({
-      suggestions: filtered,
+      suggestions: suggestions,
       generationMs: Date.now() - started,
     });
   } catch (err: any) {
