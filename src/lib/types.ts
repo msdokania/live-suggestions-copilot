@@ -9,7 +9,7 @@ export type SuggestionType =
 
 export interface Suggestion {
   type: SuggestionType;
-  title: string;       // 3-6 word headline shown on card
+  // title: string;       // 3-6 word headline shown on card
   preview: string;     // 1-2 sentence concrete value — must be useful standalone
   // sourceHint: string;   // why this was surfaced now (internal/debug; hover tooltip)
   // confidence: "high" | "medium" | "low";

@@ -91,13 +91,14 @@ export function SuggestionsColumn({
           disabled={isGeneratingSuggestions}
           title="Generate a fresh batch of 3 suggestions now"
         >
-          {isGeneratingSuggestions ? (
+          <>↻ Reload suggestions</>
+          {/* {isGeneratingSuggestions ? (
             <>
               <Spinner /> Generating…
             </>
           ) : (
             <>↻ Reload suggestions</>
-          )}
+          )} */}
         </IconButton>
         <span className="text-[11px] uppercase tracking-wider text-neutral-500">
           {isRecording
@@ -171,7 +172,7 @@ export function SuggestionsColumn({
                 suggestion={s}
                 onClick={() => onSuggestionClick(s)}
                 faded={batchIdx > 0}
-                isGenerating={isGeneratingSuggestions}
+                // isGenerating={isGeneratingSuggestions}
               />
             ))}
           </div>
@@ -185,12 +186,12 @@ function SuggestionCard({
   suggestion,
   onClick,
   faded,
-  isGenerating
+  // isGenerating
 }: {
   suggestion: Suggestion;
   onClick: () => void;
   faded?: boolean;
-  isGenerating?: boolean;
+  // isGenerating?: boolean;
 }) {
   const meta = TYPE_META[suggestion.type];
   return (
@@ -212,8 +213,8 @@ function SuggestionCard({
           : clsx(
               "border bg-panel-soft shadow-sm transition-all",
               meta.borderStrong,
-              isGenerating &&
-              "shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_0_12px_rgba(99,102,241,0.35)]"
+              // isGenerating &&
+              // "shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_0_12px_rgba(99,102,241,0.35)]"
             ),
       )}
     >

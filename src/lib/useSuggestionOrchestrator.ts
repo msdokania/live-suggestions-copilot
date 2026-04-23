@@ -73,7 +73,7 @@ export function useSuggestionOrchestrator() {
 
       const recentBatchTitles = batches
         .slice(0, settings.recentBatchesForDedup)
-        .flatMap((b) => b.suggestions.map((s) => s.title));
+        .flatMap((b) => b.suggestions.map((s) => s.preview.split(" ").slice(0,6).join(" ")));
 
       setGeneratingSuggestions(true);
       setLastSuggestionError(null);

@@ -67,10 +67,6 @@ export async function groqChatCompletionStream(
 
 /**
  * Whisper Large V3 transcription. Takes a File/Blob, returns plain text.
- *
- * `promptBias` is Whisper's optional `prompt` field — we feed the tail of
- * the previous chunk's transcript here to bias decoding for mid-word splits
- * and proper-noun continuity across 30s chunk boundaries.
  */
 export async function groqTranscribe(
   apiKey: string,
@@ -85,7 +81,7 @@ export async function groqTranscribe(
   form.append("language", "en");
   form.append("temperature", "0");
   if (opts.promptBias) {
-    // Whisper's prompt field is capped at ~224 tokens; truncate defensively.
+    // Whisper's prompt field is capped at ~224 tokens
     form.append("prompt", opts.promptBias.slice(-800));
   }
 
