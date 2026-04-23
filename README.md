@@ -224,7 +224,7 @@ Each batch's header shows its own `generationMs` ("Newest · 11:25:44 AM · 0.9s
 
 ---
 
-## Iteration history — testing and fixing
+## Iteration history - testing and fixing
 
 I ran six test transcripts across different conversation types (production incident debugging, technical interview as candidate, sales discovery call as seller, podcast interview about AI and careers, casual catch-up, YouTube lecture viewing) and iterated.
 
@@ -263,7 +263,7 @@ I ran six test transcripts across different conversation types (production incid
 
 **Fix:** dropped `reasoning`, `sourceHint`, `title`, and `confidence`. In practice, users don't hover during live meetings. For `confidence`: since the prompt asks for exactly 3 suggestions, the field almost never filtered anything out.
 
-### 7. Context window, temperature, reasoning effort
+### 6. Context window, temperature, reasoning effort
 
 - **Context reduced from 8000 → 2500 chars** (~90 sec of speech). The prompt tells the model older context is "lower priority" anyway. Halving reduced token cost with no quality drop.
 
@@ -271,7 +271,7 @@ I ran six test transcripts across different conversation types (production incid
 
 - **Default reasoning effort set to low.** Prompts were good enough.
 
-### 8. Detailed answers were reciting textbook facts, not reasoning
+### 7. Detailed answers were reciting textbook facts, not reasoning
 
 **Bug:** When I clicked a suggestion during a production-incident test, the detailed answer opened with *"Gateway misconfigurations can cause latency through several mechanisms including connection pool exhaustion..."* — accurate but useless; the user needed their next debugging step, not a textbook chapter. Worse, when I clicked a suggestion that itself contained a fabricated claim (*"Acme Corp cut approval cycle time by 30%"*), the response expanded the fabrication with more invented detail (*"~45 product managers"*, *"5 days to 3.5 days"*, *"rule-based router matched decision types to owners"*). The prompt was *helping* the fabrication by elaborating on it.
 
@@ -281,6 +281,6 @@ I ran six test transcripts across different conversation types (production incid
 
 ## Known limitations
 
-- Whisper occasionally hallucinates short foreign-language fragments on ambient noise. The exact-duplicate guard catches the common repetition case; occasional single-shot hallucinations may still appear in the transcript.
-- On Groq free tier (8k TPM, 200k TPD for GPT-OSS 120B), continuous conversation can rate-limit after ~2 minutes. The app handles this gracefully with an auto-retry banner; upgrading to Groq Dev Tier eliminates it.
-- Chrome on Mac occasionally routes the mic to the wrong input device; if transcript is empty or garbled, check System Settings → Microphone or System Settings → Sound → Input.
+- Whisper occasionally hallucinates short foreign-language fragments on ambient noise. The remove exact-duplicate guard that I added, catches the common repetition case. But occasional single-shot hallucinations may still appear in the transcript.
+- On Groq free tier (8k TPM, 200k TPD for GPT-OSS 120B), continuous conversation can rate-limit after ~3 minutes. The app handles this gracefully with an auto-retry banner; upgrading to Groq Dev Tier eliminates it.
+- Chrome on Mac occasionally routes the mic to the wrong input device. If transcript is empty or Audio too short error comes, check System Settings → Microphone or System Settings.
