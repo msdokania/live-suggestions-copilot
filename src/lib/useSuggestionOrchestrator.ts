@@ -36,7 +36,6 @@ export function useSuggestionOrchestrator() {
     setAutoRefreshCountdownMs(settings.refreshIntervalMs);
   }, [settings.refreshIntervalMs, setAutoRefreshCountdownMs]);
 
-  // Core generation. True for `manual` user-initiated click
   const runOnce = useCallback(
     async (manual: boolean = true) => {
       if (isGeneratingSuggestions) return;

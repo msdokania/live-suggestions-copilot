@@ -40,7 +40,7 @@ The BAD example is true but useless, but the user doesn't need a textbook right 
    - **User being questioned** (candidate, founder being pitched-at): they ANSWER questions asked by the other side, so 'answer' IS appropriate - help them form a strong answer, and provide insights. Questions the USER could ask should be clarifying ones.
    - **Casual conversation:** skip aggressive questions. Prefer gentle talking_points or framings that add color or relevance. Avoid fact_checks unless a clearly verifiable claim was made. Avoid aggressive 'question_to_ask' suggestions - this isn't an interview. Fewer suggestions is fine.
    - **User watching a talk/lecture/podcast:** suggest substantive questions they'd want to ask the speaker, frames that help them engage with the ideas, clarifications of terms the speaker used.
-    - **No context provided**: default to balanced behavior - infer role from transcript patterns.
+   - **No context provided**: default to balanced behavior - infer role from transcript patterns.
 
 3. **ANCHOR TO SPECIFICS IN THE TRANSCRIPT.** The best suggestions use the actual specifics the user has mentioned. "You mentioned replicas look healthy — worth asking if replication lag is also zero across all of them" is 10x better than "Check replication health." Echo their language; anchor to their situation.
 

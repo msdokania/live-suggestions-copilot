@@ -179,7 +179,6 @@ function SuggestionCard({
     <button
       type="button"
       onClick={onClick}
-      // title={suggestion.title || undefined}
       className={clsx(
         "w-full text-left rounded-lg px-4 py-3 transition-all",
         "hover:bg-[#1a1e27]",
@@ -215,4 +214,3 @@ function SuggestionCard({
     </button>
   );
 }
-
