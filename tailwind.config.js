@@ -6,11 +6,11 @@ module.exports = {
       colors: {
         // Suggestion type accents — match the mockup
         type: {
-          question: "#f59e0b",   // orange
-          talking:  "#a78bfa",   // purple
+          question: "#facc15",   // yellow
+          talking:  "#60a5fa",   // blue
           answer:   "#4ade80",   // green
-          factcheck:"#facc15",   // yellow
-          clarify:  "#60a5fa",   // blue
+          factcheck:"#a78bfa",   // purple
+          clarify:  "#f59e0b",   // orange
         },
         panel: {
           DEFAULT: "#0f1115",

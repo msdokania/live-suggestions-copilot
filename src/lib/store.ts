@@ -11,13 +11,12 @@ import type {
 import { DEFAULT_SETTINGS, type Settings } from "./prompts";
 
 interface SessionState {
-  // Session lifecycle
   sessionStart: number;
   isRecording: boolean;
 
   // Data
   transcript: TranscriptChunk[];
-  batches: SuggestionBatch[]; // newest first
+  batches: SuggestionBatch[];
   chat: ChatMessage[];
 
   // UI
@@ -101,9 +100,7 @@ export const useSession = create<SessionState>((set) => ({
 }));
 
 // -----------------------------------------------------------------------------
-// Settings store — persisted to localStorage so the user's API key and any
-// prompt tweaks survive reloads (spec: no *session* persistence; settings are
-// a separate concern and users expect them to stick).
+// Settings store — persisted to localStorage (except the meeting context)
 // -----------------------------------------------------------------------------
 
 interface SettingsState {
@@ -123,7 +120,7 @@ export const useSettings = create<SettingsState>()(
     {
       name: "twinmind-settings-v1",
       onRehydrateStorage: () => (s) => {
-        if (s) {s.settings.meetingContext = "";}
+        if (s) { s.settings.meetingContext = ""; }
       },
     },
   ),

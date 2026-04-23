@@ -12,7 +12,7 @@ function isoLocal(ts: number): string {
 export function buildSessionExport(input: {
   sessionStart: number;
   transcript: TranscriptChunk[];
-  batches: SuggestionBatch[]; // newest first
+  batches: SuggestionBatch[];
   chat: ChatMessage[];
 }): SessionExport {
   return {
@@ -22,7 +22,7 @@ export function buildSessionExport(input: {
       t: isoLocal(c.createdAt),
       text: c.text,
     })),
-    // Reverse back to chronological order for a readable export.
+
     suggestionBatches: [...input.batches]
       .slice()
       .reverse()

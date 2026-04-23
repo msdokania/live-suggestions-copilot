@@ -44,7 +44,7 @@ export function useAudioRecorder(opts: {
           console.log(
             `[recorder] fragment: ${(e.data.size / 1024).toFixed(1)}KB (total parts: ${parts.length})`,
           );
-        } 
+        }
       };
 
       recorder.onstop = () => {
@@ -58,7 +58,6 @@ export function useAudioRecorder(opts: {
             opts.onError?.(err instanceof Error ? err : new Error(String(err))),
           );
         }
-        // Immediately start the next recorder if still active.
         if (activeRef.current) startRecorder();
       };
 
@@ -92,7 +91,7 @@ export function useAudioRecorder(opts: {
         }
         if (!activeRef.current) return;
         scheduleTick(opts.chunkMs);
-      }, delayMs) 
+      }, delayMs)
     };
     scheduleTick(FIRST_CHUNK_MS);
   }, [opts]);
@@ -112,7 +111,7 @@ export function useAudioRecorder(opts: {
     recorderRef.current = null;
   }, []);
 
-  // Safety: tear down on unmount.
+  // tear down on unmount.
   useEffect(() => () => stop(), [stop]);
 
   return { start, stop };

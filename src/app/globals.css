@@ -58,3 +58,13 @@ body {
 .prose p {
   margin: 0.5rem 0;
 }
+
+.prose pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.prose code {
+  word-break: break-word;
+  white-space: pre-wrap;
+}

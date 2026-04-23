@@ -9,18 +9,15 @@ export type SuggestionType =
 
 export interface Suggestion {
   type: SuggestionType;
-  // title: string;       // 3-6 word headline shown on card
-  preview: string;     // 1-2 sentence concrete value — must be useful standalone
-  // sourceHint: string;   // why this was surfaced now (internal/debug; hover tooltip)
-  // confidence: "high" | "medium" | "low";
+  preview: string;
 }
 
 export interface SuggestionBatch {
   id: string;
   createdAt: number;             // epoch ms
   suggestions: Suggestion[];
-  generationMs?: number;         // wall-clock time it took to generate
-  transcriptTokensUsed?: number; // approximate
+  generationMs?: number;         // wall-clock time
+  transcriptTokensUsed?: number;
 }
 
 export interface TranscriptChunk {

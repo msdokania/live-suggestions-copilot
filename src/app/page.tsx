@@ -14,7 +14,6 @@ export default function Page() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const chatRef = useRef<ChatColumnHandle>(null);
 
-  // Nudge the user into Settings on first load if no API key is set.
   useEffect(() => {
     if (!settings.groqApiKey) setSettingsOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps

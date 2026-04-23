@@ -1,9 +1,3 @@
-// Server-only helpers for calling Groq.
-//
-// We use Groq's OpenAI-compatible REST API directly (no SDK). Reasons:
-//   - Zero runtime overhead, one fewer dep to explain in the README
-//   - Streaming Server-Sent Events are trivial to proxy through Next.js
-//   - We keep full control over headers (including `X-Api-Key` forwarding)
 
 const GROQ_BASE = "https://api.groq.com/openai/v1";
 
@@ -18,8 +12,7 @@ export interface ChatCompletionRequest {
 }
 
 /**
- * Non-streaming chat completion. Returns the full response JSON.
- * Throws on non-2xx with a readable message.
+ * Non-streaming chat completion. Returns the full response JSON
  */
 export async function groqChatCompletion(
   apiKey: string,
@@ -42,8 +35,7 @@ export async function groqChatCompletion(
 }
 
 /**
- * Streaming chat completion. Returns the raw Response so the caller can
- * proxy the SSE body straight to the client.
+ * Streaming chat completion. Returns the raw Response
  */
 export async function groqChatCompletionStream(
   apiKey: string,
@@ -74,7 +66,7 @@ export async function groqTranscribe(
   opts: { promptBias?: string; model?: string } = {},
 ): Promise<{ text: string }> {
   const form = new FormData();
-  // The extension matters for Groq's auto-detection; .webm is what MediaRecorder produces.
+  // Extension is important for Groq's auto-detection; .webm is what MediaRecorder produces.
   form.append("file", audio, "chunk.webm");
   form.append("model", opts.model ?? "whisper-large-v3");
   form.append("response_format", "json");

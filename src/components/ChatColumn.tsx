@@ -26,8 +26,6 @@ export const ChatColumn = forwardRef<ChatColumnHandle>(function ChatColumn(
 
   useImperativeHandle(ref, () => ({
     sendSuggestion: (s) => {
-      // Per mockup: clicking a card pushes the PREVIEW into chat as the user
-      // turn, then streams the detailed answer.
       send(s.preview, s);
     },
   }));
@@ -71,9 +69,8 @@ export const ChatColumn = forwardRef<ChatColumnHandle>(function ChatColumn(
           chat.map((m) => (
             <div key={m.id}>
               <div
-                className={`text-[10px] font-semibold tracking-widest uppercase mb-1.5 ${
-                  m.role === "user" ? "text-neutral-400" : "text-neutral-500"
-                }`}
+                className={`text-[10px] font-semibold tracking-widest uppercase mb-1.5 ${m.role === "user" ? "text-neutral-400" : "text-neutral-500"
+                  }`}
               >
                 {m.role === "assistant" ? ("ASSISTANT") : (
                   <>
@@ -90,7 +87,8 @@ export const ChatColumn = forwardRef<ChatColumnHandle>(function ChatColumn(
 
               <div
                 className={clsx(
-                  "prose prose-invert max-w-none text-[14px] break-words overflow-wrap-anywhere",
+                  "prose prose-invert max-w-none text-[14px] break-anywhere",
+                  "overflow-hidden",
                   m.role === "assistant"
                     ? "bg-panel-soft/60 border border-panel-border rounded-md px-4 py-3"
                     : "px-1"
@@ -151,9 +149,9 @@ export function ThinkingIndicator({ message = "Thinking" }: { message?: string }
 
 function normalizeLatexInput(text: string) {
   return text
-    .replace(/\u202F/g, " ")  // narrow no-break space → normal space
-    .replace(/\u00A0/g, " ")  // non-breaking space → normal space
-    .replace(/\u2011/g, "-")  // non-breaking hyphen → hyphen
-    .replace(/\u2013/g, "-")  // en dash → hyphen
-    .replace(/\u2014/g, "-"); // em dash → hyphen
+    .replace(/\u202F/g, " ")  // narrow no-break space 
+    .replace(/\u00A0/g, " ")  // non-breaking space 
+    .replace(/\u2011/g, "-")  // non-breaking hyphen 
+    .replace(/\u2013/g, "-")  // en dash 
+    .replace(/\u2014/g, "-"); // em dash
 }

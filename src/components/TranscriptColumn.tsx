@@ -26,7 +26,7 @@ export function TranscriptColumn() {
 
   const prevChunkTextRef = useRef<string>("");
 
-  // Auto-scroll to the latest chunk whenever transcript grows.
+  // Auto-scroll to the latest chunk when transcript grows.
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -54,17 +54,10 @@ export function TranscriptColumn() {
         form.append("audio", blob, blob.type.includes("mp4") ? "chunk.m4a" : "chunk.webm");
         if (lastTranscriptTailRef.current) {
           form.append("promptBias", lastTranscriptTailRef.current);
-          // form.append("promptBias", lastTranscriptTailRef.current.slice(-150));
-          // console.log(
-          //   `promptBias=${lastTranscriptTailRef.current}`,
-          // );
         }
         form.append("model", settings.transcriptionModel);
 
-        // for debugging on dev - not prod
-        console.log(
-          `[transcribe] chunk #${index} size=${(blob.size / 1024).toFixed(1)}KB type=${blob.type}`,
-        );
+        console.log(`[transcribe] chunk #${index} size=${(blob.size / 1024).toFixed(1)}KB type=${blob.type}`);
 
         const resp = await fetch("/api/transcribe", {
           method: "POST",
@@ -72,6 +65,7 @@ export function TranscriptColumn() {
           body: form,
         });
         const data = await resp.json();
+        
         if (!resp.ok) {
           const errMsg = String(data.error ?? `HTTP ${resp.status}`);
           appendTranscript(`[⚠️ ${errMsg}]`);
@@ -146,11 +140,10 @@ export function TranscriptColumn() {
         <button
           type="button"
           onClick={toggle}
-          className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors border ${
-            isRecording
+          className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors border ${isRecording
               ? "bg-red-500/90 border-red-400 text-white hover:bg-red-500"
               : "bg-panel-soft border-panel-border text-neutral-300 hover:border-neutral-500"
-          }`}
+            }`}
           title={isRecording ? "Stop recording" : "Start recording"}
         >
           {isRecording ? (

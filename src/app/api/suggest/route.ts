@@ -12,9 +12,9 @@ interface Body {
   meetingContext: string;
   reasoningEffort: "low" | "medium" | "high";
   temperature: number;
-  transcriptWindow: string;   // older context, may be empty
-  mostRecent: string;         // last ~30s, highest priority
-  recentBatchTitles: string[]; // anti-repetition
+  transcriptWindow: string;   // older context
+  mostRecent: string;
+  recentBatchTitles: string[];
 }
 
 export async function POST(req: NextRequest) {
@@ -65,57 +65,32 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     const raw = err?.response?.data ?? err;
-    console.dir(err, { depth: null });
     const code = raw?.error?.code || raw?.code || "";
-    const message = raw?.error?.message || err?.message || "Suggestion generation failed";
+    const message = raw?.error?.message || err?.message || "";
 
     if (code === "rate_limit_exceeded" || /429|rate.?limit/i.test(message)) {
+      const isDaily = /per day|TPD/i.test(message);
       const retrySec = parseRetrySeconds(message);
       return NextResponse.json(
         {
-          error: "Rate limit reached",
+          error: isDaily ? "daily_limit" : "minute_limit",
           rateLimit: true,
-          retryAfterMs: (retrySec ?? 15) * 1000,
+          retryAfterMs: (retrySec ?? (isDaily ? 3600 : 15)) * 1000,
         },
         { status: 429 },
       );
     }
     if (code === "json_validate_failed") {
       return NextResponse.json(
-        {error: "Model returned invalid JSON. Try simplifying prompt.",},
+        { error: "invalid_json" },
         { status: 400 },
       );
     }
     return NextResponse.json(
-      {error: message,},
+      { error: "generation_failed", },
       { status: 500 },
     );
-    // const msg = String(err?.message ?? "");
-    // const is429 = msg.includes("429") || /rate.?limit/i.test(msg);
-    // if (is429) {
-    //   const retrySec = parseRetrySeconds(msg);
-    //   return NextResponse.json(
-    //     {
-    //       error: "Rate limit reached",
-    //       rateLimit: true,
-    //       retryAfterMs: (retrySec ?? 15) * 1000,
-    //       retryAfterSec: retrySec ?? 15,
-    //     },
-    //     { status: 429 },
-    //   );
-    // }
-    // return NextResponse.json(
-    //   { error: err?.message ?? "Suggestion generation failed" },
-    //   { status: 500 },
-    // );
   }
-}
-
-function parseRetrySeconds(msg: string): number | null {
-  const m = msg.match(/try again in ([\d.]+)\s*s/i);
-  if (!m) return null;
-  const n = parseFloat(m[1]);
-  return Number.isFinite(n) ? Math.ceil(n) : null;
 }
 
 function buildUserMessage(body: Body): string {
@@ -150,7 +125,6 @@ function buildUserMessage(body: Body): string {
 }
 
 function parseSuggestions(raw: string): Suggestion[] | null {
-  // Strip accidental ```json fences even though JSON mode should prevent them.
   const cleaned = raw.replace(/^```json\s*|```\s*$/g, "").trim();
   try {
     const parsed = JSON.parse(cleaned);
@@ -160,6 +134,13 @@ function parseSuggestions(raw: string): Suggestion[] | null {
   } catch {
     return null;
   }
+}
+
+export function parseRetrySeconds(msg: string): number | null {
+  const m = msg.match(/try again in (\d+)m([\d.]+)s/i) || msg.match(/try again in ([\d.]+)\s*s/i);
+  if (!m) return null;
+  if (m.length === 3) return Math.ceil(parseInt(m[1]) * 60 + parseFloat(m[2]));
+  return Math.ceil(parseFloat(m[1]));
 }
 
 const VALID_TYPES = new Set([
@@ -175,8 +156,6 @@ function isValidSuggestion(s: any): s is Suggestion {
     s &&
     typeof s.type === "string" &&
     VALID_TYPES.has(s.type) &&
-    // typeof s.title === "string" &&
-    // s.title.length > 0 &&
     typeof s.preview === "string" &&
     s.preview.length > 0
   );

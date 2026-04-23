@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
     const result = await groqTranscribe(apiKey, audio, { promptBias, model });
     return NextResponse.json({ text: result.text ?? "" });
   } catch (err: any) {
-    console.log(`Error from transcribe: ${JSON.stringify(err, null, 2)}`);
     return NextResponse.json(
       { error: err?.message ?? "Transcription failed" },
       { status: 500 },

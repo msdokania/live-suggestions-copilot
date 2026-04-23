@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { groqChatCompletionStream } from "@/lib/groq";
+import { parseRetrySeconds } from "../suggest/route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ interface Body {
   model: string;
   reasoningEffort: "low" | "medium" | "high";
   temperature: number;
-  transcript: string;                // full / windowed transcript
+  transcript: string;
   history: Array<{ role: "user" | "assistant"; content: string }>;
   userMessage: string;
 }
@@ -33,9 +34,6 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Build a clean system + context user-prefix, then replay chat history,
-  // then the new user message. This keeps the system prompt byte-identical
-  // across calls for prompt-cache hits.
   const contextMessage = {
     role: "user" as const,
     content: `## MEETING TRANSCRIPT (context)\n${body.transcript || "(empty)"}\n\nUse this transcript to ground your answers. Do not restate it unless asked.`,
@@ -62,8 +60,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 1500,
     });
 
-    // Transform Groq's OpenAI-format SSE into a clean token stream for the
-    // client. Each event yields one text delta. End of stream = "[DONE]".
+    // Groq's OpenAI-format SSE into a clean token stream
     const stream = new ReadableStream({
       async start(controller) {
         const reader = upstream.body!.getReader();
@@ -95,7 +92,7 @@ export async function POST(req: NextRequest) {
                   controller.enqueue(new TextEncoder().encode(delta));
                 }
               } catch {
-                // Ignore malformed chunks; Groq sometimes sends keep-alives.
+                // Ignore malformed chunks
               }
             }
           }
@@ -114,8 +111,25 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
+    const msg = String(err?.message ?? "");
+    const is429 = msg.includes("429") || /rate.?limit/i.test(msg);
+
+    if (is429) {
+      const isDaily = /per day|TPD/i.test(msg);
+      const retrySec = parseRetrySeconds(msg);
+
+      return new Response(
+        JSON.stringify({
+          error: isDaily ? "daily_limit" : "minute_limit",
+          retryAfterMs: (retrySec ?? (isDaily ? 3600 : 15)) * 1000,
+          rateLimit: true,
+        }),
+        { status: 429, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     return new Response(
-      JSON.stringify({ error: err?.message ?? "Chat failed" }),
+      JSON.stringify({ error: "Something went wrong. Please try again." }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }

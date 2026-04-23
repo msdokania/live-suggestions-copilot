@@ -268,26 +268,20 @@ export const DEFAULTS = {
 
   meetingContext: "",
 
-  // Reasoning effort — GPT-OSS 120B supports low/medium/high.
-  // Low is fast and plenty smart for structured JSON output. Medium for chat.
   suggestionReasoningEffort: "medium" as "low" | "medium" | "high",
   chatReasoningEffort: "medium" as "low" | "medium" | "high",
 
-  // Context windows — how much transcript to send to each call.
-  // Measured in characters (approx 4 chars/token). Kept small for latency.
   suggestionContextChars: 4000,   // 4000 -> ~1k tokens, last ~2 minutes of speech
   detailedAnswerContextChars: 32000, // ~8k tokens, full recent meeting
   chatContextChars: 32000,
 
   refreshIntervalMs: 30_000,
 
-  // Audio chunks
   chunkDurationMs: 30_000,
 
   suggestionTemperature: 0.3,   // low for structured suggestions
   chatTemperature: 0.6,         // moderate for chat
 
-  // recent batch titles to pass into the anti-repetition list
   recentBatchesForDedup: 3,
 };
 
