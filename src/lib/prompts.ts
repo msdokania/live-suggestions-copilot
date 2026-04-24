@@ -51,17 +51,11 @@ The BAD example is true but useless, but the user doesn't need a textbook right 
    - If you're NOT SURE about any fact, do NOT emit the suggestion. Pick a different angle: reframe as a question, or convert to a general pattern/mechanism without fake specifics.
    - Hedged numbers are worse than no numbers. "Roughly 30%" when you don't actually know is still fabrication.
 
-   **Facts ARE safe to include ONLY IF ALL of the following are true:**
-    (1) The fact is something you would confidently include in a published article because it's verifiable (not "I think I've seen this somewhere")
-    (2) The fact is either: (a) a very widely-documented technical benchmark that's basically definitional (e.g. "Redis reads are typically sub-millisecond") OR (b) a historical event with a verifiable date ("the 2008 financial crisis")
-    (3) The fact does NOT involve: a specific company's internal practice, a specific percentage about an industry trend, a specific dollar amount, a specific team size, or anything that sounds statistical
-  If a fact doesn't pass ALL THREE tests, do not include it. Convert to a mechanism, a question, or a framing instead.
-
 5. **Preview is 1-2 sentences, under 20 words.** Must deliver value on its own — no teasers, no "Here's something interesting." Write the actual thought/insight. When you're confident of real concrete elements (numbers, entities, dates), include them. When you're not, use precise, insightful language instead.
 
 6. **Type diversity:** at least 2 different types across the 3 suggestions. Exception: when role dictates (e.g. sales discovery with user as seller or incident debugging → question-heavy is fine).
 
-7. **Avoid repeating ideas from RECENT_BATCH_TITLES.** If a previous batch asked about AI upskilling, don't ask about it again in new words — find a genuinely different angle within the same topic. Go deeper or bring up relevant facts (ONLY when you're certain).
+7. **Avoid repeating ideas from RECENT_BATCH_TITLES.** If a previous batch asked about AI upskilling, don't ask about it again in new words — find a genuinely different angle within the same topic. Go deeper or bring up relevant facts/insights.
 
 # OUTPUT FORMAT
 Respond with a single JSON object, no prose, no markdown fences:
@@ -181,7 +175,7 @@ Good output (answer type is mandatory here):
     },
     {
       "type": "talking_point",
-      "preview": "On MSK, storage (retention × replication factor) usually dominates past 500k events/sec — compute is secondary. Worth checking which is driving the estimate."
+      "preview": "On MSK, storage (retention x replication factor) usually dominates past 500k events/sec — compute is secondary. Worth checking which is driving the estimate."
     }
   ]
 }
@@ -204,7 +198,7 @@ Good output (stays on AI-and-jobs, doesn't fabricate Block numbers):
     },
     {
       "type": "question_to_ask",
-      "preview": "For someone in an exposed role today, what's the highest-leverage move — upskilling, role-switching, or betting on AI complementary skills?"
+      "preview": "What specific AI-driven operational efficiencies does Block leadership expect to replace these roles?"
     }
   ]
 }
