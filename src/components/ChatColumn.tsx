@@ -147,11 +147,37 @@ export function ThinkingIndicator({ message = "Thinking" }: { message?: string }
   );
 }
 
-function normalizeLatexInput(text: string) {
+function normalizeLatexInput(text: string): string {
   return text
-    .replace(/\u202F/g, " ")  // narrow no-break space 
-    .replace(/\u00A0/g, " ")  // non-breaking space 
-    .replace(/\u2011/g, "-")  // non-breaking hyphen 
-    .replace(/\u2013/g, "-")  // en dash 
-    .replace(/\u2014/g, "-"); // em dash
+    // ─── Whitespace normalization ──────────────────────────────
+    .replace(/\u202F/g, " ")  // narrow no-break space
+    .replace(/\u00A0/g, " ")  // non-breaking space
+    .replace(/\u2009/g, " ")  // thin space
+    .replace(/\u200B/g, "")   // zero-width space (strip entirely)
+    .replace(/\uFEFF/g, "")   // BOM / zero-width no-break space
+
+    // ─── Dash normalization ────────────────────────────────────
+    .replace(/\u2011/g, "-")  // non-breaking hyphen
+    .replace(/\u2012/g, "-")  // figure dash
+    .replace(/\u2013/g, "-")  // en dash
+    .replace(/\u2014/g, "-")  // em dash
+    .replace(/\u2212/g, "-")  // minus sign
+
+    // ─── Quote normalization ────────────────────────────────────
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")  // curly single quotes
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')  // curly double quotes
+
+    // ─── Ellipsis ──────────────────────────────────────────────
+    .replace(/\u2026/g, "...")
+
+    // Escape $ when followed by a digit — this is currency, not math.
+    .replace(/\$(?=\d)/g, "\\$")
+
+    // ─── LaTeX delimiter conversion ────────────────────────────
+    // Some models emit \( \) and \[ \] instead of $ $ and $$ $$.
+    .replace(/\\\[([\s\S]+?)\\\]/g, "$$$$$1$$$$")  // \[...\] → $$...$$
+    .replace(/\\\(([\s\S]+?)\\\)/g, "$$$1$$")       // \(...\) → $...$
+
+    // ─── Trim stray trailing whitespace on lines ───────────────
+    .replace(/[ \t]+$/gm, "");
 }
